@@ -11,6 +11,7 @@ const (
 	KindBool
 	KindSymbol
 	KindIdentifier
+	KindSpace
 )
 
 var Keywords = [][]byte{
@@ -29,6 +30,7 @@ var Keywords = [][]byte{
 	[]byte(","),
 	[]byte("->"),
 	[]byte("."),
+	[]byte("="),
 	[]byte("=="),
 	[]byte("!="),
 	[]byte("<"),
@@ -48,23 +50,7 @@ var Keywords = [][]byte{
 	[]byte("^"),
 	[]byte("<<"),
 	[]byte(">>"),
-}
-
-func SkipSpaces(buf []byte) []byte {
-	r := 0
-
-LOOP:
-	for i := 0; i < len(buf); i++ {
-		switch buf[i] {
-		case ' ', '\t', '\n', '\r':
-			continue
-		default:
-			r = i
-			break LOOP
-		}
-	}
-
-	return buf[r:]
+	[]byte("  "),
 }
 
 func ParseKeyword(buf []byte) (*Token, []byte, error) {
@@ -299,6 +285,23 @@ func ParseSymbol(buf []byte) (*Token, []byte, error) {
 	}, buf[len(value)-1:], nil
 }
 
+func ParseSpace(buf []byte) (*Token, []byte, error) {
+	if len(buf) == 0 {
+		return nil, nil, fmt.Errorf("unexpected end of input")
+	}
+
+	switch buf[0] {
+	case ' ', '\t', '\r', '\n':
+	default:
+		return nil, nil, fmt.Errorf("unexpected token: %s", string(buf))
+	}
+
+	return &Token{
+		Value: buf[:1],
+		Kind:  KindSpace,
+	}, buf[1:], nil
+}
+
 var parsers = []func([]byte) (*Token, []byte, error){
 	ParseKeyword,
 	ParseString,
@@ -308,12 +311,12 @@ var parsers = []func([]byte) (*Token, []byte, error){
 	ParseBool,
 	ParseSymbol,
 	ParseIdentifier,
+	ParseSpace,
 }
 
 func Parse(buf []byte) ([]*Token, error) {
 	tokens := []*Token(nil)
 
-	skipSpace := false
 	globalError := error(nil)
 	for len(buf) > 0 {
 		for _, parser := range parsers {
@@ -325,16 +328,11 @@ func Parse(buf []byte) ([]*Token, error) {
 			buf = rest
 			tokens = append(tokens, token)
 			globalError = nil
-			skipSpace = false
 			break
 		}
 
 		if globalError != nil {
-			if skipSpace {
-				return nil, globalError
-			}
-			buf = SkipSpaces(buf)
-			skipSpace = true
+			return tokens, globalError
 		}
 	}
 
