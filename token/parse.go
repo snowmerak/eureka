@@ -30,6 +30,8 @@ var Keywords = [][]byte{
 	[]byte(";"),
 	[]byte(","),
 	[]byte("->"),
+	[]byte("<-"),
+	[]byte("<->"),
 	[]byte("."),
 	[]byte("="),
 	[]byte("=="),
@@ -52,9 +54,6 @@ var Keywords = [][]byte{
 	[]byte("<<"),
 	[]byte(">>"),
 	[]byte("  "),
-	[]byte("$"),
-	[]byte("#"),
-	[]byte("@"),
 }
 
 func ParseKeyword(buf []byte) (*Token, []byte, error) {
