@@ -34,6 +34,8 @@ var keywords = [][]byte{
 	[]byte(")"),
 	[]byte("{"),
 	[]byte("}"),
+	[]byte("["),
+	[]byte("]"),
 	[]byte(":"),
 	[]byte(";"),
 	[]byte(","),
