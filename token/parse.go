@@ -4,6 +4,7 @@ import "fmt"
 
 const (
 	KindKeyworkd = iota
+	KindType
 	KindString
 	KindCharactor
 	KindInteger
@@ -14,7 +15,7 @@ const (
 	KindSpace
 )
 
-var Keywords = [][]byte{
+var keywords = [][]byte{
 	[]byte("func"),
 	[]byte("return"),
 	[]byte("if"),
@@ -69,7 +70,7 @@ func ParseKeyword(buf []byte) (*Token, []byte, error) {
 		return nil, nil, fmt.Errorf("unexpected end of input")
 	}
 
-	for _, v := range Keywords {
+	for _, v := range keywords {
 		if len(buf) < len(v) {
 			continue
 		}
@@ -78,6 +79,37 @@ func ParseKeyword(buf []byte) (*Token, []byte, error) {
 			return &Token{
 				Value: v,
 				Kind:  KindKeyworkd,
+			}, buf[len(v):], nil
+		}
+	}
+
+	return nil, nil, fmt.Errorf("unexpected token: %s", string(buf))
+}
+
+var types = [][]byte{
+	[]byte("int"),
+	[]byte("float"),
+	[]byte("bool"),
+	[]byte("string"),
+	[]byte("char"),
+	[]byte("void"),
+	[]byte("any"),
+}
+
+func ParseType(buf []byte) (*Token, []byte, error) {
+	if len(buf) == 0 {
+		return nil, nil, fmt.Errorf("unexpected end of input")
+	}
+
+	for _, v := range types {
+		if len(buf) < len(v) {
+			continue
+		}
+
+		if string(buf[:len(v)]) == string(v) {
+			return &Token{
+				Value: v,
+				Kind:  KindType,
 			}, buf[len(v):], nil
 		}
 	}
@@ -315,6 +347,7 @@ func ParseSpace(buf []byte) (*Token, []byte, error) {
 
 var parsers = []func([]byte) (*Token, []byte, error){
 	ParseKeyword,
+	ParseType,
 	ParseString,
 	ParseCharactor,
 	ParseFloat,
