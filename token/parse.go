@@ -23,6 +23,8 @@ var Keywords = [][]byte{
 	[]byte("then"),
 	[]byte("("),
 	[]byte(")"),
+	[]byte("{"),
+	[]byte("}"),
 	[]byte(":"),
 	[]byte(","),
 	[]byte("->"),
