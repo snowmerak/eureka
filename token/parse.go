@@ -60,6 +60,7 @@ var Keywords = [][]byte{
 	[]byte("^"),
 	[]byte("<<"),
 	[]byte(">>"),
+	[]byte(":="),
 	[]byte("  "),
 }
 
