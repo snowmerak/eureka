@@ -188,6 +188,9 @@ func ParseInteger(buf []byte) (*Token, []byte, error) {
 	value := []byte(nil)
 	for i := 0; i < len(buf); i++ {
 		if buf[i] < '0' || buf[i] > '9' {
+			if buf[i] == '.' {
+				return nil, nil, fmt.Errorf("unexpected token: %s", string(buf))
+			}
 			return &Token{
 				Value: value,
 				Kind:  KindInteger,
