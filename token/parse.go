@@ -3,7 +3,7 @@ package token
 import "fmt"
 
 const (
-	KindKeyworkd = iota
+	KindKeyword = iota
 	KindType
 	KindString
 	KindCharactor
@@ -64,7 +64,6 @@ var keywords = [][]byte{
 	[]byte("&"),
 	[]byte("|"),
 	[]byte("^"),
-	[]byte("  "),
 }
 
 func ParseKeyword(buf []byte) (*Token, []byte, error) {
@@ -80,7 +79,7 @@ func ParseKeyword(buf []byte) (*Token, []byte, error) {
 		if string(buf[:len(v)]) == string(v) {
 			return &Token{
 				Value: v,
-				Kind:  KindKeyworkd,
+				Kind:  KindKeyword,
 			}, buf[len(v):], nil
 		}
 	}
@@ -89,8 +88,16 @@ func ParseKeyword(buf []byte) (*Token, []byte, error) {
 }
 
 var types = [][]byte{
-	[]byte("int"),
-	[]byte("float"),
+	[]byte("i8"),
+	[]byte("i16"),
+	[]byte("i32"),
+	[]byte("i64"),
+	[]byte("u8"),
+	[]byte("u16"),
+	[]byte("u32"),
+	[]byte("u64"),
+	[]byte("f32"),
+	[]byte("f64"),
 	[]byte("bool"),
 	[]byte("string"),
 	[]byte("char"),
@@ -275,13 +282,13 @@ func ParseIdentifier(buf []byte) (*Token, []byte, error) {
 		return nil, nil, fmt.Errorf("unexpected end of input")
 	}
 
-	if buf[0] < 'a' || buf[0] > 'z' {
+	if (buf[0] < 'a' || buf[0] > 'z') && (buf[0] < 'A' || buf[0] > 'Z') {
 		return nil, nil, fmt.Errorf("unexpected token: %s", string(buf))
 	}
 
 	value := []byte(nil)
 	for i := 0; i < len(buf); i++ {
-		if (buf[i] < 'a' || buf[i] > 'z') && (buf[i] < '0' || buf[i] > '9') && buf[i] != '_' {
+		if (buf[i] < 'a' || buf[i] > 'z') && (buf[i] < 'A' || buf[i] > 'Z') && (buf[i] < '0' || buf[i] > '9') && buf[i] != '_' {
 			return &Token{
 				Value: value,
 				Kind:  KindIdentifier,
@@ -383,4 +390,20 @@ func Parse(buf []byte) ([]*Token, error) {
 	}
 
 	return tokens, nil
+}
+
+func ParseWithoutSpace(buf []byte) ([]*Token, error) {
+	tokens, err := Parse(buf)
+	if err != nil {
+		return tokens, err
+	}
+
+	filtered := []*Token(nil)
+	for _, token := range tokens {
+		if token.Kind != KindSpace {
+			filtered = append(filtered, token)
+		}
+	}
+
+	return filtered, nil
 }
