@@ -10,7 +10,8 @@ import (
 // <name>: <type>
 type Field struct {
 	Name string
-	Type string
+	Kind int
+	Type any
 }
 
 func ParseField(data []*token.Token) (*Field, []*token.Token, error) {
@@ -26,14 +27,48 @@ func ParseField(data []*token.Token) (*Field, []*token.Token, error) {
 		return nil, nil, fmt.Errorf("unexpected token: %s", string(data[1].Value))
 	}
 
-	if data[2].Kind != token.KindType && data[2].Kind != token.KindIdentifier {
-		return nil, nil, fmt.Errorf("unexpected token: %s", string(data[2].Value))
+	field := &Field{
+		Name: string(data[0].Value),
+	}
+	remains := data
+
+	switch data[2].Kind {
+	case token.KindType:
+		field.Kind = KindType
+		field.Type = string(data[2].Value)
+		remains = data[3:]
+	case token.KindKeyword:
+		switch string(data[2].Value) {
+		case "[":
+			arr, rem, err := ParseArray(data[2:])
+			if err != nil {
+				return nil, nil, err
+			}
+			field.Kind = KindArray
+			field.Type = *arr
+			remains = rem
+		case "struct":
+			str, rem, err := ParseStrcut(data[2:])
+			if err != nil {
+				return nil, nil, err
+			}
+			field.Kind = KindStruct
+			field.Type = *str
+			remains = rem
+		case "interface":
+			ifc, rem, err := ParseInterface(data[2:])
+			if err != nil {
+				return nil, nil, err
+			}
+			field.Kind = KindInterface
+			field.Type = *ifc
+			remains = rem
+		default:
+			return nil, nil, fmt.Errorf("unexpected token: %s", string(data[2].Value))
+		}
 	}
 
-	return &Field{
-		Name: string(data[0].Value),
-		Type: string(data[2].Value),
-	}, data[3:], nil
+	return field, remains, nil
 }
 
 // struct is a structure.
