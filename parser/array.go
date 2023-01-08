@@ -46,7 +46,7 @@ func ParseArray(data []*token.Token) (*Array, []*token.Token, error) {
 			Length: length,
 			Type:   typ,
 			Values: []string{},
-		}, data[3:], nil
+		}, data[4:], nil
 	}
 
 	var values []string
