@@ -41,7 +41,7 @@ func ParseArray(data []*token.Token) (*Array, []*token.Token, error) {
 
 	typ := string(data[3].Value)
 
-	if data[4].Kind != token.KindKeyword || string(data[4].Value) != "{" {
+	if len(data) < 5 || data[4].Kind != token.KindKeyword || string(data[4].Value) != "{" {
 		return &Array{
 			Length: length,
 			Type:   typ,
