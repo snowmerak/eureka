@@ -3,20 +3,44 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/snowmerak/eureka/parser"
 	"github.com/snowmerak/eureka/token"
 )
 
 func main() {
-	a := []byte(`select * from table where id = 1 and name = "snowmerak"`)
-	fmt.Println([]byte(` = 1 and name = "snowmerak"`))
+	data, err := os.ReadFile("test.csc")
+	if err != nil {
+		panic(err)
+	}
 
-	tokens, err := token.Parse(a)
+	tokens, err := token.ParseWithoutSpace(data)
 	if err != nil {
 		log.Println(err)
 	}
 
-	for _, t := range tokens {
-		fmt.Printf("%s, %d\n", t.Value, t.Kind)
+	person, remains, err := parser.ParseStrcut(tokens)
+	if err != nil {
+		log.Println(err)
 	}
+	fmt.Println(person)
+
+	itf, remains, err := parser.ParseInterface(remains)
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(itf)
+
+	enum, remains, err := parser.ParseEnum(remains)
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(enum)
+
+	arr, remains, err := parser.ParseArray(remains)
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(arr)
 }
